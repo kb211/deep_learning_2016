@@ -8,6 +8,8 @@ from __future__ import print_function
 import argparse
 
 import tensorflow as tf
+from tensorflow.contrib.layers import initializers
+from tensorflow.contrib.layers import regularizers
 import numpy as np
 import cifar10_utils
 import mlp
@@ -41,33 +43,33 @@ LOG_DIR_DEFAULT = './logs/cifar10'
 # You can check the TensorFlow API at
 # https://www.tensorflow.org/versions/r0.11/api_docs/python/contrib.layers.html#initializers
 # https://www.tensorflow.org/versions/r0.11/api_docs/python/state_ops.html#sharing-variables
-WEIGHT_INITIALIZATION_DICT = {'xavier': None, # Xavier initialisation
-                              'normal': None, # Initialization from a standard normal
-                              'uniform': None, # Initialization from a uniform distribution
+WEIGHT_INITIALIZATION_DICT = {'xavier': lambda scale: initializers.xavier_initializer(), # Xavier initialisation
+                              'normal': lambda scale: tf.random_normal_initializer(stddev=scale), # Initialization from a standard normal
+                              'uniform': lambda scale: tf.random_uniform_initializer(minval=-scale, maxval=scale) # Initialization from a uniform distribution
                              }
 
 # You can check the TensorFlow API at
 # https://www.tensorflow.org/versions/r0.11/api_docs/python/contrib.layers.html#regularizers
 # https://www.tensorflow.org/versions/r0.11/api_docs/python/state_ops.html#sharing-variables
-WEIGHT_REGULARIZER_DICT = {'none': None, # No regularization
-                           'l1': None, # L1 regularization
-                           'l2': None # L2 regularization
+WEIGHT_REGULARIZER_DICT = {'none': lambda weight: regularizers.l1_regularizer(0.), # No regularization
+                           'l1': lambda weight: regularizers.l1_regularizer(weight), # L1 regularization
+                           'l2': lambda weight: regularizers.l2_regularizer(weight) # L2 regularization
                           }
 
 # You can check the TensorFlow API at
 # https://www.tensorflow.org/versions/r0.11/api_docs/python/nn.html#activation-functions
 ACTIVATION_DICT = {'relu': tf.nn.relu, # ReLU
                    'elu': tf.nn.elu, # ELU
-                   'tanh': None, #Tanh
-                   'sigmoid': None} #Sigmoid
+                   'tanh': tf.tanh, #Tanh
+                   'sigmoid': tf.sigmoid} #Sigmoid
 
 # You can check the TensorFlow API at
 # https://www.tensorflow.org/versions/r0.11/api_docs/python/train.html#optimizers
-OPTIMIZER_DICT = {'sgd': None, # Gradient Descent
-                  'adadelta': None, # Adadelta
-                  'adagrad': None, # Adagrad
+OPTIMIZER_DICT = {'sgd': tf.train.GradientDescentOptimizer, # Gradient Descent
+                  'adadelta': tf.train.AdadeltaOptimizer, # Adadelta
+                  'adagrad': tf.train.AdagradOptimizer, # Adagrad
                   'adam': tf.train.AdamOptimizer, # Adam
-                  'rmsprop': None # RMSprop
+                  'rmsprop': tf.train.RMSPropOptimizer # RMSprop
                   }
 
 FLAGS = None
@@ -96,29 +98,31 @@ def train():
   cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
   x_test, y_test = cifar10.test.images, cifar10.test.labels
   
-#  _initializer  = FLAGS.weight_init
-#  _regularizer = FLAGS.weight_reg
-#  _activation = FLAGS.activation
-#  _optimizer = FLAGS.optimizer
-  model = mlp.MLP()
-#  model = mlp.MLP(n_hidden = FLAGS.dnn_hidden_units,
-#               activation_fn = ACTIVATION_DICT._activation, 
-#               dropout_rate = FLAGS.dropout_rate,
-#               weight_initializer = WEIGHT_INITIALIZATION_DICT._initializer,
-#               weight_regularizer = WEIGHT_REGULARIZER_DICT._regularizer,
-#               optimizer = OPTIMIZER_DICT._optimizer);
+  _initializer  = FLAGS.weight_init
+  _regularizer = FLAGS.weight_reg
+  _activation = FLAGS.activation
+  _optimizer = FLAGS.optimizer
+#  model = mlp.MLP()
+  model = mlp.MLP(
+               n_classes=10,
+               is_training=True,
+               n_hidden = dnn_hidden_units,
+               activation_fn = ACTIVATION_DICT[_activation],
+               dropout_rate=FLAGS.dropout_rate, 
+               weight_initializer = WEIGHT_INITIALIZATION_DICT[_initializer](FLAGS.weight_init_scale),
+               weight_regularizer = WEIGHT_REGULARIZER_DICT[_regularizer](FLAGS.weight_reg_strength))
   
   x = tf.placeholder(tf.float32, [None, 3072]) 
   y = tf.placeholder(tf.float32, [None, 10])
   
   logits = model.inference(x)  
   
-  cross_entropy = model.loss(logits, y)
+  loss = model.loss(logits, y)
   
   accuracy = model.accuracy(logits, y)
   
-  train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE_DEFAULT).minimize(cross_entropy)
-  
+  #train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE_DEFAULT).minimize(cross_entropy)
+  train_step = OPTIMIZER_DICT[_optimizer](FLAGS.learning_rate, name="optimizer").minimize(loss)
   init = tf.initialize_all_variables()
   
   sess = tf.Session()
