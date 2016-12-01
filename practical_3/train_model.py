@@ -86,7 +86,7 @@ def train():
 
     model = convnet.ConvNet(n_classes=10)
   
-    x = tf.placeholder(tf.float32, [None, 3, 32, 32]) 
+    x = tf.placeholder(tf.float32, [None, 32, 32, 3]) 
     y = tf.placeholder(tf.float32, [None, 10])
   
     logits = model.inference(x)  
