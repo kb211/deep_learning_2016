@@ -95,7 +95,7 @@ def train():
   
     accuracy = model.accuracy(logits, y)
   
-    train_step = train_step(loss)
+    step = train_step(loss)
     
     init = tf.initialize_all_variables()
   
@@ -110,7 +110,7 @@ def train():
   
     for i in range(FLAGS.max_steps):
       batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
-      summary, _ = sess.run([merged, train_step], feed_dict={x: batch_xs, y: batch_ys})
+      summary, _ = sess.run([merged, step], feed_dict={x: batch_xs, y: batch_ys})
       train_writer.add_summary(summary, i)
       
       if i % 100 == 0:
