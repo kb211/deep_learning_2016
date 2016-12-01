@@ -59,7 +59,7 @@ class ConvNet(object):
             reg_strength = 0.001
             with tf.name_scope('conv1') as scope:
                 W_conv = tf.get_variable("w_conv1", [5, 5, 3, 64], initializer= tf.random_normal_initializer(), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
-                b_conv = tf.get_variable("b_conv1", initializer=tf.constant_initializer(0.0))
+                b_conv = tf.get_variable("b_conv1", [64], initializer=tf.constant_initializer(0.0))
     
                 conv = tf.nn.conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
                 relu = tf.nn.relu(tf.nn._bias_add(conv + b_conv))
@@ -67,7 +67,7 @@ class ConvNet(object):
     	
             with tf.name_scope('conv2') as scope:
                 W_conv = tf.get_variable("w_conv2", [5, 5, 64, 64], initializer= tf.random_normal_initializer(), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
-                b_conv = tf.get_variable("b_conv2", initializer=tf.constant_initializer(0.0))
+                b_conv = tf.get_variable("b_conv2", [64], initializer=tf.constant_initializer(0.0))
     
                 conv = tf.nn.conv2d(max_pool, W_conv, strides=[1, 1, 1, 1], padding='SAME')
                 relu = tf.nn.relu(tf.nn.bias_add(conv, b_conv))
