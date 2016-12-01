@@ -65,7 +65,7 @@ class ConvNet(object):
 		max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
 	
 	    with tf.name_scope('conv2') as scope:
-                W_conv = tf.get_variable("w_conv2", [5, 5, 64, 64], initializer= initializer= tf.random_normal(stddev=0.35), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
+                W_conv = tf.get_variable("w_conv2", [5, 5, 64, 64], initializer= tf.random_normal(stddev=0.35), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 b_conv = tf.get_variable("b_conv2", initializer=tf.constant_initializer(0.0))
 
                 conv = tf.nn.conv2d(max_pool, W_conv, strides=[1, 1, 1, 1], padding='SAME')

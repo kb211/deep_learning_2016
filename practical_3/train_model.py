@@ -4,9 +4,10 @@ from __future__ import print_function
 
 import argparse
 import os
-
+import cifar10_utils
 import tensorflow as tf
 import numpy as np
+import convnet
 
 LEARNING_RATE_DEFAULT = 1e-4
 BATCH_SIZE_DEFAULT = 128
@@ -35,7 +36,7 @@ def train_step(loss):
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-    train_op = OPTIMIZER_DICT[_optimizer](FLAGS.learning_rate, name="optimizer").minimize(loss)
+    train_op = tf.train.AdamOptimizer(FLAGS.learning_rate, name="optimizer").minimize(loss)
     ########################
     # END OF YOUR CODE    #
     ########################
@@ -82,20 +83,8 @@ def train():
     ########################
     cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
     x_test, y_test = cifar10.test.images, cifar10.test.labels
-  
-    _initializer  = FLAGS.weight_init
-    _regularizer = FLAGS.weight_reg
-    _activation = FLAGS.activation
-    _optimizer = FLAGS.optimizer
-#  model = mlp.MLP()
-    model = mlp.MLP(
-               n_classes=10,
-               is_training=True,
-               n_hidden = dnn_hidden_units,
-               activation_fn = ACTIVATION_DICT[_activation],
-               dropout_rate=FLAGS.dropout_rate, 
-               weight_initializer = WEIGHT_INITIALIZATION_DICT[_initializer](FLAGS.weight_init_scale),
-               weight_regularizer = WEIGHT_REGULARIZER_DICT[_regularizer](FLAGS.weight_reg_strength))
+
+    model = convnet.ConvNet(n_classes=10)
   
     x = tf.placeholder(tf.float32, [None, 3072]) 
     y = tf.placeholder(tf.float32, [None, 10])
