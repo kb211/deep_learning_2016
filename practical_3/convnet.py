@@ -79,7 +79,7 @@ class ConvNet(object):
             with tf.name_scope('fc1') as scope:
                 W = tf.get_variable('w1',
                                     initializer=tf.random_normal_initializer(),
-                                    shape=[max_pool.get_shape()[1].value, 384],
+                                    shape=[flat.get_shape()[1].value, 384],
     				regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 tf.histogram_summary('weights1', W)
                 b = tf.Variable(tf.zeros([384]))
