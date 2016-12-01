@@ -81,7 +81,7 @@ class ConvNet(object):
                 tf.histogram_summary('weights1', W)
                 b = tf.Variable(tf.zeros([384]))
                 tf.histogram_summary('biasses1',  b)
-                h = tf.relu(tf.matmul(max_pool, W) + b, name=scope.name)
+                h = tf.nn.relu(tf.matmul(max_pool, W) + b, name=scope.name)
     
             with tf.name_scope('fc2') as scope:
                 W = tf.get_variable('w2',
