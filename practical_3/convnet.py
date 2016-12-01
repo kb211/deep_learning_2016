@@ -55,52 +55,53 @@ class ConvNet(object):
             ########################
             # PUT YOUR CODE HERE  #
             ########################
-	    reg_strength = 0.001
+        
+            reg_strength = 0.001
             with tf.name_scope('conv1') as scope:
-		W_conv = tf.get_variable("w_conv1", [5, 5, 3, 64], shape=[x.get_shape()[1].value, n] ,initializer= tf.random_normal(stddev=0.35), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
-		b_conv = tf.get_variable("b_conv2", initializer=tf.constant_initializer(0.0))
-
-	    	conv = tf.nn.conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
-		relu = tf.nn.relu(conv)
-		max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
-	
-	    with tf.name_scope('conv2') as scope:
+                W_conv = tf.get_variable("w_conv1", [5, 5, 3, 64], initializer= tf.random_normal(stddev=0.35), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
+                b_conv = tf.get_variable("b_conv2", initializer=tf.constant_initializer(0.0))
+    
+                conv = tf.nn.conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
+                relu = tf.nn.relu(tf.nn._bias_add(conv + b_conv))
+                max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
+    	
+            with tf.name_scope('conv2') as scope:
                 W_conv = tf.get_variable("w_conv2", [5, 5, 64, 64], initializer= tf.random_normal(stddev=0.35), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 b_conv = tf.get_variable("b_conv2", initializer=tf.constant_initializer(0.0))
-
+    
                 conv = tf.nn.conv2d(max_pool, W_conv, strides=[1, 1, 1, 1], padding='SAME')
-                relu = tf.nn.relu(conv)
+                relu = tf.nn.relu(tf.nn.bias_add(conv, b_conv))
                 max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
-	
+    	
             with tf.name_scope('fc1') as scope:
                 W = tf.get_variable('w1',
-                                initializer=self.weight_initializer,
-                                shape=[max_pool.get_shape()[1].value, n],
-				regularizer=self.weight_regularizer)
+                                    initializer=self.weight_initializer,
+                                    shape=[max_pool.get_shape()[1].value, 384],
+    				regularizer=self.weight_regularizer)
                 tf.histogram_summary('weights1', W)
-            	b = tf.Variable(tf.zeros([n]))
-            	tf.histogram_summary('biasses1',  b)
-            	h = tf.relu(tf.matmul(h, W) + b, name=scope.name)
-
-	    with tf.name_scope('fc2') as scope:
+                b = tf.Variable(tf.zeros([384]))
+                tf.histogram_summary('biasses1',  b)
+                h = tf.relu(tf.matmul(max_pool, W) + b, name=scope.name)
+    
+            with tf.name_scope('fc2') as scope:
                 W = tf.get_variable('w2',
-                                initializer=self.weight_initializer,
-                                shape=[h.get_shape()[1].value, n],
-                                regularizer=self.weight_regularizer)
+                                    initializer=self.weight_initializer,
+                                    shape=[384, 192],
+                                    regularizer=self.weight_regularizer)
                 tf.histogram_summary('weights2', W)
-            	b = tf.Variable(tf.zeros([n]))
-            	tf.histogram_summary('biasses2',  b)
-            	h = tf.nn.relu(tf.matmul(h, W) + b, name=scope.name)	
-
+                b = tf.Variable(tf.zeros([192]))
+                tf.histogram_summary('biasses2',  b)
+                h = tf.nn.relu(tf.matmul(h, W) + b, name=scope.name)	
+    
             with tf.name_scope('fc3') as scope:
                 W = tf.get_variable('final_w',
-                                initializer=self.weight_initializer,
-                                shape=[h.get_shape()[1].value, n],
-                                regularizer=self.weight_regularizer)
+                                    initializer=self.weight_initializer,
+                                    shape=[192, 10],
+                                    regularizer=self.weight_regularizer)
                 tf.histogram_summary('final_weights', W)
-            	b = tf.Variable(tf.zeros([n]))
-            	tf.histogram_summary('final_biasses',  b)
-            	logits = tf.matmul(h, W) + b
+                b = tf.Variable(tf.zeros([10]))
+                tf.histogram_summary('final_biasses',  b)
+                logits = tf.matmul(h, W) + b
             ########################
             # END OF YOUR CODE    #
             ########################
