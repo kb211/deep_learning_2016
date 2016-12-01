@@ -62,7 +62,7 @@ class ConvNet(object):
                 b_conv = tf.get_variable("b_conv1", [64], initializer=tf.constant_initializer(0.0))
     
                 conv = tf.nn.conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
-                relu = tf.nn.relu(tf.nn.bias_add(conv + b_conv))
+                relu = tf.nn.relu(tf.nn.bias_add(conv, b_conv))
                 max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
     	
             with tf.name_scope('conv2') as scope:
