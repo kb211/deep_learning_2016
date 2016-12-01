@@ -73,6 +73,9 @@ class ConvNet(object):
                 relu = tf.nn.relu(tf.nn.bias_add(conv, b_conv))
                 max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
     	
+            with tf.name_scope('flatten') as scope:
+                flat = tf.reshape(max_pool, [-1, 64*8*8], name='flatten')
+     
             with tf.name_scope('fc1') as scope:
                 W = tf.get_variable('w1',
                                     initializer=tf.random_normal_initializer(),
@@ -81,7 +84,7 @@ class ConvNet(object):
                 tf.histogram_summary('weights1', W)
                 b = tf.Variable(tf.zeros([384]))
                 tf.histogram_summary('biasses1',  b)
-                h = tf.nn.relu(tf.matmul(max_pool, W) + b, name=scope.name)
+                h = tf.nn.relu(tf.matmul(flat, W) + b, name=scope.name)
     
             with tf.name_scope('fc2') as scope:
                 W = tf.get_variable('w2',
