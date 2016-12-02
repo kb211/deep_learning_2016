@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 import numpy as np
-
+from tensorflow.contrib.layers import initializers
 
 
 class ConvNet(object):
@@ -58,7 +58,7 @@ class ConvNet(object):
         
             reg_strength = 0.001
             with tf.name_scope('conv1') as scope:
-                W_conv = tf.get_variable("w_conv1", [5, 5, 3, 64], initializer= tf.random_normal_initializer(), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
+                W_conv = tf.get_variable("w_conv1", [5, 5, 3, 64], initializer= initializers.xavier_initializer(), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 b_conv = tf.get_variable("b_conv1", [64], initializer=tf.constant_initializer(0.0))
     
                 conv = tf.nn.conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
@@ -66,7 +66,7 @@ class ConvNet(object):
                 max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
     	
             with tf.name_scope('conv2') as scope:
-                W_conv = tf.get_variable("w_conv2", [5, 5, 64, 64], initializer= tf.random_normal_initializer(), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
+                W_conv = tf.get_variable("w_conv2", [5, 5, 64, 64], initializer= initializers.xavier_initializer(), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 b_conv = tf.get_variable("b_conv2", [64], initializer=tf.constant_initializer(0.0))
     
                 conv = tf.nn.conv2d(max_pool, W_conv, strides=[1, 1, 1, 1], padding='SAME')
@@ -78,7 +78,7 @@ class ConvNet(object):
      
             with tf.name_scope('fc1') as scope:
                 W = tf.get_variable('w1',
-                                    initializer=tf.random_normal_initializer(),
+                                    initializer=initializers.xavier_initializer(),
                                     shape=[flat.get_shape()[1].value, 384],
     				regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 tf.histogram_summary('weights1', W)
@@ -88,7 +88,7 @@ class ConvNet(object):
     
             with tf.name_scope('fc2') as scope:
                 W = tf.get_variable('w2',
-                                    initializer=tf.random_normal_initializer(),
+                                    initializer=initializers.xavier_initializer(),
                                     shape=[384, 192],
                                     regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 tf.histogram_summary('weights2', W)
@@ -98,7 +98,7 @@ class ConvNet(object):
     
             with tf.name_scope('fc3') as scope:
                 W = tf.get_variable('final_w',
-                                    initializer=tf.random_normal_initializer(),
+                                    initializer=initializers.xavier_initializer(),
                                     shape=[192, 10],
                                     regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 tf.histogram_summary('final_weights', W)
