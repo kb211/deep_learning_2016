@@ -111,11 +111,11 @@ def train():
     for i in range(FLAGS.max_steps):
       batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
       summary, _ = sess.run([merged, step], feed_dict={x: batch_xs, y: batch_ys})
-      train_writer.add_summary(summary, i)
+      #train_writer.add_summary(summary, i)
       
       if i % 100 == 0:
-          summary, acc = sess.run([merged, accuracy], feed_dict={x: x_test, y: y_test})
-          print(acc)
+          summary, acc, l = sess.run([merged, accuracy, loss], feed_dict={x: x_test, y: y_test})
+          print('iteration: ' + i + 'Accuracy: ' + acc + 'Loss: ' + l)
           test_writer.add_summary(summary, i)
 
     test_writer.close()
