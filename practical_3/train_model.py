@@ -9,6 +9,7 @@ import tensorflow as tf
 import numpy as np
 import convnet
 from sklearn import manifold
+import matplotlib.pyplot as plt
 
 LEARNING_RATE_DEFAULT = 1e-4
 BATCH_SIZE_DEFAULT = 128
@@ -213,13 +214,24 @@ def feature_extraction():
     cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
     x_test, y_test = cifar10.test.images, cifar10.test.labels
 
-    acc = sess.run([accuracy], feed_dict={x: x_test, y: y_test})
+    acc, fc2_out = sess.run([accuracy, model.fc2_out], feed_dict={x: x_test, y: y_test})
     print('Accuracy: ' + str(acc))
     
     
-    #tnse = manifold.TSNE(n_components=2 , init='pca', random_state=0)
-    #X_tsne = tsne.fit_transform(X)
-    #Y = tsne.fit_transform(all_vars['fc']
+    tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
+    fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
+    labels = ['0','1','2','3','4','5','6','7','8','9']
+    assert fc2_tsne.shape[0] >= len(labels), "More labels than weights"
+    plt.figure(figsize=(20, 20))  #in inches
+    for i, label in enumerate(labels):
+        x, y = fc2_tsne[i,:]
+        plt.scatter(x, y)
+        plt.annotate(label,
+                 xy=(x, y),
+                 xytext=(5, 2),
+                 textcoords='offset points',
+                 ha='right',
+                 va='bottom')
     ########################
     # END OF YOUR CODE    #
     ########################
