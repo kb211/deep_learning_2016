@@ -221,8 +221,9 @@ def feature_extraction():
     
     	tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
     	fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
-    	labels = ['0','1','2','3','4','5','6','7','8','9']
-    	assert fc2_tsne.shape[0] >= len(labels), "More labels than weights"
+    	#labels = ['0','1','2','3','4','5','6','7','8','9']
+	labels = np.argmax(y_test, axis=0)
+	
     	plt.figure(figsize=(20, 20))  #in inches
     	for i, label in enumerate(labels):
         	x, y = fc2_tsne[i,:]
