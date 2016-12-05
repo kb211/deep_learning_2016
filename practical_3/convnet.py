@@ -56,7 +56,7 @@ class ConvNet(object):
             # PUT YOUR CODE HERE  #
             ########################
         
-            reg_strength = 0.001
+            reg_strength = 0.00
             with tf.name_scope('conv1') as scope:
                 W_conv = tf.get_variable("w_conv1", [5, 5, 3, 64], initializer= initializers.xavier_initializer(), regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
                 b_conv = tf.get_variable("b_conv1", [64], initializer=tf.constant_initializer(0.0))
