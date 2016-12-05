@@ -8,6 +8,7 @@ import cifar10_utils
 import tensorflow as tf
 import numpy as np
 import convnet
+from sklearn import manifold
 
 LEARNING_RATE_DEFAULT = 1e-4
 BATCH_SIZE_DEFAULT = 128
@@ -99,6 +100,7 @@ def train():
     
     init = tf.initialize_all_variables()
   
+    saver = tf.train.Saver()
     sess = tf.Session()
     sess.run(init)
   
@@ -107,7 +109,7 @@ def train():
     #train_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/train',
     #                                  sess.graph)
     #test_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/test')
-    print( 'max_steps:' +  str(FLAGS.max_steps)) 
+    
     for i in range(FLAGS.max_steps):
       batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
       summary, _ = sess.run([merged, step], feed_dict={x: batch_xs, y: batch_ys})
@@ -121,9 +123,7 @@ def train():
     #test_writer.close()
     #train_writer.close()
     
-    saver = tf.train.Saver()
-    save_path = saver.save(sess, "/tmp/convnet.ckpt")
-    print("Model saved in file: %" % save_path)
+    save_path = saver.save(sess, "checkpoints/convnet")
     ########################
     # END OF YOUR CODE    #
     ########################
@@ -194,10 +194,30 @@ def feature_extraction():
     ########################
     # PUT YOUR CODE HERE  #
     ########################
+    model = convnet.ConvNet(n_classes=10)
+
+    x = tf.placeholder(tf.float32, [None, 32, 32, 3])
+    y = tf.placeholder(tf.float32, [None, 10])
+
+    logits = model.inference(x)
+
+    accuracy = model.accuracy(logits, y)
+
+    init = tf.initialize_all_variables()
+
     saver = tf.train.Saver()
+
     with tf.Session() as sess:
-        saver.restore(sess, "/tmp/convnet.ckpt")
-    print("Model restored")
+  	saver.restore(sess, "/checkpoints/convnet.ckpt")
+
+    cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
+    x_test, y_test = cifar10.test.images, cifar10.test.labels
+
+    summary, acc, l = sess.run([merged, accuracy, loss], feed_dict={x: x_test, y: y_test})
+    print('Accuracy: ' + str(acc) + ' Loss: ' + str(l))
+
+    tnse = manifold.TSNE(n_components=2 , init='pca', random_state=0)
+    #Y = tsne.fit_transform(all_vars['fc']
     ########################
     # END OF YOUR CODE    #
     ########################
@@ -228,7 +248,7 @@ def main(_):
 
     initialize_folders()
 
-    if FLAGS.is_train:
+    if FLAGS.is_train == 'True':
         if FLAGS.train_model == 'linear':
             train()
         elif FLAGS.train_model == 'siamese':
