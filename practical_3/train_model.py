@@ -213,10 +213,12 @@ def feature_extraction():
     cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
     x_test, y_test = cifar10.test.images, cifar10.test.labels
 
-    summary, acc, l = sess.run([merged, accuracy, loss], feed_dict={x: x_test, y: y_test})
-    print('Accuracy: ' + str(acc) + ' Loss: ' + str(l))
-
-    tnse = manifold.TSNE(n_components=2 , init='pca', random_state=0)
+    acc = sess.run([accuracy], feed_dict={x: x_test, y: y_test})
+    print('Accuracy: ' + str(acc))
+    
+    
+    #tnse = manifold.TSNE(n_components=2 , init='pca', random_state=0)
+    #X_tsne = tsne.fit_transform(X)
     #Y = tsne.fit_transform(all_vars['fc']
     ########################
     # END OF YOUR CODE    #
