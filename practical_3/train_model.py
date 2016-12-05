@@ -209,7 +209,7 @@ def feature_extraction():
     saver = tf.train.Saver()
 
     with tf.Session() as sess:
-  	saver.restore(sess, "/checkpoints/convnet.ckpt")
+  	saver.restore(sess, "checkpoints/convnet")
 
     cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
     x_test, y_test = cifar10.test.images, cifar10.test.labels
@@ -232,6 +232,7 @@ def feature_extraction():
                  textcoords='offset points',
                  ha='right',
                  va='bottom')
+    plt.savefig('tsne.png')
     ########################
     # END OF YOUR CODE    #
     ########################
