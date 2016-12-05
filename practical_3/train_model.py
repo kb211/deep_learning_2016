@@ -107,7 +107,7 @@ def train():
     #train_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/train',
     #                                  sess.graph)
     #test_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/test')
-    print( 'max_steps:' +  FLAGS.max_steps) 
+    print( 'max_steps:' +  str(FLAGS.max_steps)) 
     for i in range(FLAGS.max_steps):
       batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
       summary, _ = sess.run([merged, step], feed_dict={x: batch_xs, y: batch_ys})
@@ -115,11 +115,11 @@ def train():
       
       if i % 100 == 0:
           summary, acc, l = sess.run([merged, accuracy, loss], feed_dict={x: x_test, y: y_test})
-          print('iteration: ' + str(i) + 'Accuracy: ' + str(acc) + 'Loss: ' + l)
+          print('iteration: ' + str(i) + 'Accuracy: ' + str(acc) + 'Loss: ' + str(l))
           #test_writer.add_summary(summary, i)
 
-    test_writer.close()
-    train_writer.close()
+    #test_writer.close()
+    #train_writer.close()
     
     saver = tf.train.Saver()
     save_path = saver.save(sess, "/tmp/convnet.ckpt")
