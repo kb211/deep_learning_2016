@@ -227,13 +227,13 @@ def feature_extraction():
     	plt.figure(figsize=(20, 20))  #in inches
     	for i, label in enumerate(labels):
         	x, y = fc2_tsne[i,:]
-        	plt.scatter(x, y)
-        	plt.annotate(label,
-                 xy=(x, y),
-                 xytext=(5, 2),
-                 textcoords='offset points',
-                 ha='right',
-                 va='bottom')
+        	plt.scatter(x, y, c=label)
+#        	plt.annotate(label,
+#                 xy=(x, y),
+#                 xytext=(5, 2),
+#                 textcoords='offset points',
+#                 ha='right',
+#                 va='bottom')
     	plt.savefig('tsne.png')
     ########################
     # END OF YOUR CODE    #
