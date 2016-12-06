@@ -75,7 +75,8 @@ class ConvNet(object):
     	
             with tf.name_scope('flatten') as scope:
                 flat = tf.reshape(max_pool, [-1, 64*8*8], name='flatten')
-     
+    		self.flatten = flat 
+
             with tf.name_scope('fc1') as scope:
                 W = tf.get_variable('w1',
                                     initializer=initializers.xavier_initializer(),

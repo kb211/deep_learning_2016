@@ -215,26 +215,36 @@ def feature_extraction():
     	cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
     	x_test, y_test = cifar10.test.images, cifar10.test.labels
 
-    	acc, fc2_out = sess.run([accuracy, model.fc2_out], feed_dict={x: x_test, y: y_test})
+    	acc, fc2_out, fc3_out, flatten = sess.run([accuracy, model.fc2_out, logits, model.flatten], feed_dict={x: x_test, y: y_test})
     	print('Accuracy: ' + str(acc))
     
     
     	tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
     	fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
+	fc3_tsne = tsne.fit_transform(np.squeeze(fc3_out))
+	flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
     	#labels = ['0','1','2','3','4','5','6','7','8','9']
 	labels = np.argmax(y_test, axis=1)
 	
     	plt.figure(figsize=(20, 20))  #in inches
-    	for i, label in enumerate(labels):
-        	x, y = fc2_tsne[i,:]
-        	plt.scatter(x, y, c=label)
-#        	plt.annotate(label,
-#                 xy=(x, y),
-#                 xytext=(5, 2),
-#                 textcoords='offset points',
-#                 ha='right',
-#                 va='bottom')
+
+        x = fc2_tsne[:,0]
+	y = fc2_tsne[:,1]
+        plt.scatter(x, y, c=labels)
     	plt.savefig('tsne.png')
+
+        x = fc3_tsne[:,0]
+        y = fc3_tsne[:,1]
+        plt.scatter(x, y, c=labels)
+        plt.savefig('fc3_tsne.png')
+	
+	plt.figure(figsize=(20, 20))  #in inches
+
+        x = flatten_tsne[:,0]
+        y = flatten_tsne[:,1]
+        plt.scatter(x, y, c=labels)
+        plt.savefig('flatten_tsne.png')
+
     ########################
     # END OF YOUR CODE    #
     ########################
