@@ -86,7 +86,7 @@ class ConvNet(object):
                 b = tf.Variable(tf.zeros([384]))
                 tf.histogram_summary('biasses1',  b)
                 h = tf.nn.relu(tf.matmul(flat, W) + b, name='h1')
-    
+   		self.fc1_out = h 
             with tf.name_scope('fc2') as scope:
                 W = tf.get_variable('w2',
                                     initializer=initializers.xavier_initializer(),

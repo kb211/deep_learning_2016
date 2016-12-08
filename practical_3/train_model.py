@@ -215,39 +215,55 @@ def feature_extraction():
     	cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
     	x_test, y_test = cifar10.test.images, cifar10.test.labels
 
-    	acc, fc2_out, fc3_out, flatten = sess.run([accuracy, model.fc2_out, logits, model.flatten], feed_dict={x: x_test, y: y_test})
+    	acc, fc2_out, fc1_out, flatten = sess.run([accuracy, model.fc2_out, model.fc1_out, model.flatten], feed_dict={x: x_test, y: y_test})
     	print('Accuracy: ' + str(acc))
     
     
     	tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
     	fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
-	fc3_tsne = tsne.fit_transform(np.squeeze(fc3_out))
+	fc1_tsne = tsne.fit_transform(np.squeeze(fc1_out))
 	flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
-    	#labels = ['0','1','2','3','4','5','6','7','8','9']
+    	
 	labels = np.argmax(y_test, axis=1)
 	
     	plt.figure(figsize=(20, 20))  #in inches
 
-        x = fc2_tsne[:,0]
-	y = fc2_tsne[:,1]
+        x = fc2_tsne[:,0]/np.linalg.norm(fc2_tsne[:,0])
+	y = fc2_tsne[:,1]/np.linalg.norm(fc2_tsne[:,1])
         plt.scatter(x, y, c=labels)
-    	plt.savefig('tsne.png')
+    	plt.savefig('fc2_tsne_norm.png')
 
-        x = fc3_tsne[:,0]
-        y = fc3_tsne[:,1]
+	plt.figure(figsize=(20, 20))
+
+        x = fc3_tsne[:,0]/np.linalg.norm(fc3_tsne[:,0])
+        y = fc3_tsne[:,1]/np.linalg.norm(fc3_tsne[:,1])
         plt.scatter(x, y, c=labels)
-        plt.savefig('fc3_tsne.png')
+        plt.savefig('fc3_tsne_norm.png')
 	
 	plt.figure(figsize=(20, 20))  #in inches
 
-        x = flatten_tsne[:,0]
-        y = flatten_tsne[:,1]
+        x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
+        y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
         plt.scatter(x, y, c=labels)
-        plt.savefig('flatten_tsne.png')
+        plt.savefig('flatten_tsne_norm.png')
 
+	_classify(fc2_tsne, labels)
+	_classify(fc3_tsne, labels)
+	_classify(flatten_tsne, labels)
     ########################
     # END OF YOUR CODE    #
     ########################
+
+def _classify(tsne, labels):
+	from sklearn.svm import SVC
+
+	for i in np.arange(0,10):
+        	classifier = SVC(kernel='linear', class_weight='balanced')  
+        	Y = [1 if label == i else 0 for label in labels  ]
+    
+        	classifier.fit(tsne, Y)
+    
+        	print('for class: %i', i, 'score: %f', classifier.score(tsne, labels))  
 
 def initialize_folders():
     """
@@ -258,7 +274,16 @@ def initialize_folders():
         tf.gfile.MakeDirs(FLAGS.log_dir)
 
     if not tf.gfile.Exists(FLAGS.data_dir):
-        tf.gfile.MakeDirs(FLAGS.data_dir)
+        def _classify(tsne, labels):
+    from sklearn.svm import SVC
+
+    for i in np.arange(0,10):
+        classifier = SVC(kernel='linear', class_weight='balanced')  
+        Y = [1 if label == i else 0 for label in labels  ]
+    
+        classifier.fit(tsne, Y)
+    
+        print('for class: %i', i, 'score: %f', classifier.score(tsne, labels))tf.gfile.MakeDirs(FLAGS.data_dir)
 
     if not tf.gfile.Exists(FLAGS.checkpoint_dir):
         tf.gfile.MakeDirs(FLAGS.checkpoint_dir)
