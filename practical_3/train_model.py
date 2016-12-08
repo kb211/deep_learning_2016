@@ -221,8 +221,8 @@ def feature_extraction():
     
     	tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
     	fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
-	fc1_tsne = tsne.fit_transform(np.squeeze(fc1_out))
-	flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
+	#fc1_tsne = tsne.fit_transform(np.squeeze(fc1_out))
+	#flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
     	
 	labels = np.argmax(y_test, axis=1)
 	
@@ -233,23 +233,23 @@ def feature_extraction():
         plt.scatter(x, y, c=labels)
     	plt.savefig('fc2_tsne_norm.png')
 
-	plt.figure(figsize=(20, 20))
+	#plt.figure(figsize=(20, 20))
 
-        x = fc3_tsne[:,0]/np.linalg.norm(fc3_tsne[:,0])
-        y = fc3_tsne[:,1]/np.linalg.norm(fc3_tsne[:,1])
-        plt.scatter(x, y, c=labels)
-        plt.savefig('fc3_tsne_norm.png')
+        #x = fc1_tsne[:,0]/np.linalg.norm(fc1_tsne[:,0])
+        #y = fc1_tsne[:,1]/np.linalg.norm(fc1_tsne[:,1])
+        #plt.scatter(x, y, c=labels)
+        #plt.savefig('fc3_tsne_norm.png')
 	
-	plt.figure(figsize=(20, 20))  #in inches
+	#plt.figure(figsize=(20, 20))  #in inches
 
-        x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
-        y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
-        plt.scatter(x, y, c=labels)
-        plt.savefig('flatten_tsne_norm.png')
+        #x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
+        #y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
+        #plt.scatter(x, y, c=labels)
+        #plt.savefig('flatten_tsne_norm.png')
 
 	_classify(fc2_tsne, labels)
-	_classify(fc3_tsne, labels)
-	_classify(flatten_tsne, labels)
+	#_classify(fc3_tsne, labels)
+	#_classify(flatten_tsne, labels)
     ########################
     # END OF YOUR CODE    #
     ########################
@@ -273,17 +273,8 @@ def initialize_folders():
         tf.gfile.MakeDirs(FLAGS.log_dir)
 
     if not tf.gfile.Exists(FLAGS.data_dir):
-        def _classify(tsne, labels):
-    from sklearn.svm import SVC
-
-    for i in np.arange(0,10):
-        classifier = SVC(kernel='linear', class_weight='balanced')  
-        Y = [1 if label == i else 0 for label in labels  ]
+        tf.gfile.MakeDirs(FLAGS.data_dir)
     
-        classifier.fit(tsne, Y)
-    
-        print('for class: %i', i, 'score: %f', classifier.score(tsne, labels))tf.gfile.MakeDirs(FLAGS.data_dir)
-
     if not tf.gfile.Exists(FLAGS.checkpoint_dir):
         tf.gfile.MakeDirs(FLAGS.checkpoint_dir)
 
