@@ -95,8 +95,8 @@ class ConvNet(object):
                 tf.histogram_summary('weights2', W)
                 b = tf.Variable(tf.zeros([192]))
                 tf.histogram_summary('biasses2',  b)
-                h = tf.nn.relu(tf.matmul(h, W) + b, name='h2')	
-                self.fc2_out = h
+                h2 = tf.nn.relu(tf.matmul(h, W) + b, name='h2')	
+                self.fc2_out = h2
                 
             with tf.name_scope('fc3') as scope:
                 W = tf.get_variable('final_w',
@@ -106,7 +106,7 @@ class ConvNet(object):
                 tf.histogram_summary('final_weights', W)
                 b = tf.Variable(tf.zeros([10]))
                 tf.histogram_summary('final_biasses',  b)
-                logits = tf.matmul(h, W) + b
+                logits = tf.matmul(h2, W) + b
             ########################
             # END OF YOUR CODE    #
             ########################

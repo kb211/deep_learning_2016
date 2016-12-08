@@ -221,8 +221,8 @@ def feature_extraction():
     
     	tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
     	fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
-	#fc1_tsne = tsne.fit_transform(np.squeeze(fc1_out))
-	#flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
+	fc1_tsne = tsne.fit_transform(np.squeeze(fc1_out))
+	flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
     	
 	labels = np.argmax(y_test, axis=1)
 	
@@ -233,21 +233,24 @@ def feature_extraction():
         plt.scatter(x, y, c=labels)
     	plt.savefig('fc2_tsne_norm.png')
 
-	#plt.figure(figsize=(20, 20))
+	plt.figure(figsize=(20, 20))
 
-        #x = fc1_tsne[:,0]/np.linalg.norm(fc1_tsne[:,0])
-        #y = fc1_tsne[:,1]/np.linalg.norm(fc1_tsne[:,1])
-        #plt.scatter(x, y, c=labels)
-        #plt.savefig('fc3_tsne_norm.png')
+        x = fc1_tsne[:,0]/np.linalg.norm(fc1_tsne[:,0])
+        y = fc1_tsne[:,1]/np.linalg.norm(fc1_tsne[:,1])
+        plt.scatter(x, y, c=labels)
+        plt.savefig('fc3_tsne_norm.png')
 	
-	#plt.figure(figsize=(20, 20))  #in inches
+	plt.figure(figsize=(20, 20))  #in inches
 
-        #x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
-        #y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
-        #plt.scatter(x, y, c=labels)
-        #plt.savefig('flatten_tsne_norm.png')
+        x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
+        y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
+        plt.scatter(x, y, c=labels)
+        plt.savefig('flatten_tsne_norm.png')
 
-	_classify(fc2_tsne, labels)
+	fc2_tsne.dump('fc2_tsne')
+	fc1_tsne.dump('fc1_tsne')
+	flatten_tsne.dump('flatten_tsne')
+	#_classify(fc2_tsne, labels)
 	#_classify(fc3_tsne, labels)
 	#_classify(flatten_tsne, labels)
     ########################
@@ -262,7 +265,7 @@ def _classify(tsne, labels):
     
         classifier.fit(tsne, Y)
     
-        print('for class: %i', i, 'score: %f', classifier.score(tsne, labels))  
+        print('for class: ', i, 'score: ', classifier.score(tsne, labels))  
 
 def initialize_folders():
     """
