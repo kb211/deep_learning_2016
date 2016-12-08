@@ -255,15 +255,14 @@ def feature_extraction():
     ########################
 
 def _classify(tsne, labels):
-	from sklearn.svm import SVC
-
-	for i in np.arange(0,10):
-        	classifier = SVC(kernel='linear', class_weight='balanced')  
-        	Y = [1 if label == i else 0 for label in labels  ]
+    from sklearn.svm import SVC
+    for i in np.arange(0,10):
+        classifier = SVC(kernel='linear', class_weight='balanced')  
+        Y = [1 if label == i else 0 for label in labels  ]
     
-        	classifier.fit(tsne, Y)
+        classifier.fit(tsne, Y)
     
-        	print('for class: %i', i, 'score: %f', classifier.score(tsne, labels))  
+        print('for class: %i', i, 'score: %f', classifier.score(tsne, labels))  
 
 def initialize_folders():
     """
