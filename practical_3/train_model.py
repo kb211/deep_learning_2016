@@ -210,20 +210,23 @@ def feature_extraction():
     saver = tf.train.Saver()
 
     with tf.Session() as sess:
-  	saver.restore(sess, "checkpoints/convnet")
+  	#saver.restore(sess, "checkpoints/convnet")
 
     	cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
     	x_test, y_test = cifar10.test.images, cifar10.test.labels
 
-    	acc, fc2_out, fc1_out, flatten = sess.run([accuracy, model.fc2_out, model.fc1_out, model.flatten], feed_dict={x: x_test, y: y_test})
-    	print('Accuracy: ' + str(acc))
+    	#acc, fc2_out, fc1_out, flatten = sess.run([accuracy, model.fc2_out, model.fc1_out, model.flatten], feed_dict={x: x_test, y: y_test})
+    	#print('Accuracy: ' + str(acc))
     
     
-    	tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
-    	fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
-	fc1_tsne = tsne.fit_transform(np.squeeze(fc1_out))
-	flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
+    	#tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
+    	#fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
+	#fc1_tsne = tsne.fit_transform(np.squeeze(fc1_out))
+	#flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
     	
+	fc2_tsne = np.load('fc2_tsne')
+	fc1_tsne = np.load('fc1_tsne')
+	flatten_tsne = np.load('flatten_tsne')
 	labels = np.argmax(y_test, axis=1)
 	
     	plt.figure(figsize=(20, 20))  #in inches
@@ -247,12 +250,12 @@ def feature_extraction():
         plt.scatter(x, y, c=labels)
         plt.savefig('flatten_tsne_norm.png')
 
-	fc2_tsne.dump('fc2_tsne')
-	fc1_tsne.dump('fc1_tsne')
-	flatten_tsne.dump('flatten_tsne')
-	#_classify(fc2_tsne, labels)
-	#_classify(fc3_tsne, labels)
-	#_classify(flatten_tsne, labels)
+	#fc2_tsne.dump('fc2_tsne')
+	#fc1_tsne.dump('fc1_tsne')
+	#flatten_tsne.dump('flatten_tsne')
+	_classify(fc2_tsne, labels)
+	_classify(fc3_tsne, labels)
+	_classify(flatten_tsne, labels)
     ########################
     # END OF YOUR CODE    #
     ########################
