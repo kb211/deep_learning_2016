@@ -177,6 +177,8 @@ def train_siamese():
     n_tuples = 500
     _size = FLAGS.batch_size
     f_same = 0.2
+    cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
+    
     dataset = cifar10_siamese_utils.create_dataset(source=cifar10.test, num_tuples=n_tuples, batch_size=_size, fraction_same=f_same)
     
 
