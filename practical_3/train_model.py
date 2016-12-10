@@ -234,6 +234,7 @@ def feature_extraction():
         x = fc2_tsne[:,0]/np.linalg.norm(fc2_tsne[:,0])
 	y = fc2_tsne[:,1]/np.linalg.norm(fc2_tsne[:,1])
         plt.scatter(x, y, c=labels)
+	plt.colorbar()
     	plt.savefig('fc2_tsne_norm.png')
 
 	plt.figure(figsize=(20, 20))
@@ -241,20 +242,25 @@ def feature_extraction():
         x = fc1_tsne[:,0]/np.linalg.norm(fc1_tsne[:,0])
         y = fc1_tsne[:,1]/np.linalg.norm(fc1_tsne[:,1])
         plt.scatter(x, y, c=labels)
-        plt.savefig('fc3_tsne_norm.png')
+	plt.colorbar()
+        plt.savefig('fc1_tsne_norm.png')
 	
 	plt.figure(figsize=(20, 20))  #in inches
 
         x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
         y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
         plt.scatter(x, y, c=labels)
+	plt.colorbar()
         plt.savefig('flatten_tsne_norm.png')
 
 	#fc2_tsne.dump('fc2_tsne')
 	#fc1_tsne.dump('fc1_tsne')
 	#flatten_tsne.dump('flatten_tsne')
+	print('fc1 scores: ')
+	_classify(fc1_tsne, labels)
+	print('fc2 scores: ')
 	_classify(fc2_tsne, labels)
-	_classify(fc3_tsne, labels)
+	print('flatten layer scores: ')
 	_classify(flatten_tsne, labels)
     ########################
     # END OF YOUR CODE    #
@@ -262,13 +268,23 @@ def feature_extraction():
 
 def _classify(tsne, labels):
     from sklearn.svm import SVC
+    from collections import Counter
     for i in np.arange(0,10):
-        classifier = SVC(kernel='linear', class_weight='balanced')  
+        classifier = SVC(kernel='linear')  
         Y = [1 if label == i else 0 for label in labels  ]
+	class_tsne = tsne
+   	occurences = Counter(Y)
+	
+	while occurences[0] != occurences[1]:
+		length = len(Y)
+        	index = np.random.choice(np.arange(0, length))
+        	if Y[index] == 0:
+            		Y = np.delete(Y, index, 0)
+        		class_tsne = np.delete(class_tsne, index, 0)
+        	occurences = Counter(Y) 
+        classifier.fit(class_tsne, Y)
     
-        classifier.fit(tsne, Y)
-    
-        print('for class: ', i, 'score: ', classifier.score(tsne, labels))  
+        print('for class: ', i, 'score: ', classifier.score(class_tsne, Y))  
 
 def initialize_folders():
     """
