@@ -156,7 +156,7 @@ def create_dataset(source='Train', num_tuples = 500, batch_size = 128, fraction_
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-    raise NotImplementedError
+    dset = [ source.next_batch(batch_size, fraction_same) for i in range(num_tuples)]    
     ########################
     # END OF YOUR CODE    #
     ########################
@@ -266,8 +266,6 @@ class DataSet(object):
         else:
             break
         
-        
-        return x1, x2, labels
     ########################
     # END OF YOUR CODE    #
     ########################
