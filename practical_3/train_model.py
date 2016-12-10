@@ -174,10 +174,10 @@ def train_siamese():
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-    num_tuples = 500
-    batch_size = FLAGS.batch_size
-    fraction_same = 0.2
-    dataset = cifar10_siamese_utils.create_dataset(source=cifar10.test, num_tuples, batch_size, fraction_same)
+    n_tuples = 500
+    _size = FLAGS.batch_size
+    f_same = 0.2
+    dataset = cifar10_siamese_utils.create_dataset(source=cifar10.test, num_tuples=n_tuples, batch_size=_size, fraction_same=f_same)
     
 
     model = siamese.Siamese(n_classes=10, reuse=True)
@@ -271,7 +271,7 @@ def feature_extraction():
 	flatten_tsne = np.load('flatten_tsne')
 	labels = np.argmax(y_test, axis=1)
 	
-    	plt.figure(figsize=(20, 20))  #in inches
+    	plt.figure(figsize=(25, 20))  #in inches
 
         x = fc2_tsne[:,0]/np.linalg.norm(fc2_tsne[:,0])
 	y = fc2_tsne[:,1]/np.linalg.norm(fc2_tsne[:,1])
@@ -279,7 +279,7 @@ def feature_extraction():
 	plt.colorbar()
     	plt.savefig('fc2_tsne_norm.png')
 
-	plt.figure(figsize=(20, 20))
+	plt.figure(figsize=(25, 20))
 
         x = fc1_tsne[:,0]/np.linalg.norm(fc1_tsne[:,0])
         y = fc1_tsne[:,1]/np.linalg.norm(fc1_tsne[:,1])
@@ -287,7 +287,7 @@ def feature_extraction():
 	plt.colorbar()
         plt.savefig('fc1_tsne_norm.png')
 	
-	plt.figure(figsize=(20, 20))  #in inches
+	plt.figure(figsize=(25, 20))  #in inches
 
         x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
         y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
