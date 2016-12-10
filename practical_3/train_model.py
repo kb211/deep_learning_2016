@@ -177,18 +177,19 @@ def train_siamese():
     n_tuples = 500
     _size = FLAGS.batch_size
     f_same = 0.2
-    cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
+    
+    cifar10 = cifar10_siamese_utils.get_cifar10('cifar10/cifar-10-batches-py')
     
     dataset = cifar10_siamese_utils.create_dataset(source=cifar10.test, num_tuples=n_tuples, batch_size=_size, fraction_same=f_same)
     
 
-    model = siamese.Siamese(n_classes=10, reuse=True)
+    model = siamese.Siamese()
     x1 = tf.placeholder(tf.float32, [None, 32, 32, 3])
     x2 = tf.placeholder(tf.float32, [None, 32, 32, 3])
     
     y = tf.placeholder(tf.float32, [None, 10])
     
-    channel1_out = model.inference(x1)
+    channel1_out = model.inference(x1, reuse=True)
         
     channel2_out = model.inference(x2)
     

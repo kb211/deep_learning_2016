@@ -239,29 +239,32 @@ class DataSet(object):
     same_counter = 0
     diff_counter = 0
     
-    x1 = np.empty([batch_size, 32, 32, 3])
-    x2 = np.empty([batch_size, 32, 32, 3])
+    x1 = np.empty([0, 32, 32, 3])
+    x2 = np.empty([0, 32, 32, 3])
+    
     labels = np.empty([batch_size])
     
-    rand = random.randrange(0, self.images.size())
+    rand = random.randrange(0, self.images.shape[0])
     anchor_image = self.images[rand]
     anchor_label = self.labels[rand]
     num_same_images = np.ceil(fraction_same*batch_size)
     num_diff_images = batch_size-num_same_images
-    
+    print(x1.shape)
+    print(anchor_image.shape)
     for i in range(batch_size):
-        rand2 = random.randrange(0, self.images.size())
+        rand2 = random.randrange(0, self.images.shape[0])
         new_image = self.images[rand2]
         new_label = self.labels[rand2]
-        if anchor_label == new_label and same_counter < num_same_images:
-            np.append(x1, anchor_image, axis=1)
-            np.append(x2, new_image, axis=1)
-            np.append(1, labels)
+	
+        if np.argmax(anchor_label) == np.argmax(new_label) and same_counter < num_same_images:
+            x1 = np.concatenate((x1, [anchor_image]), axis=0)
+            x2 = np.concatenate((x2, [new_image]), axis=0)
+            labels = np.append(labels, 1)
             same_counter += 1
-        elif anchor_label != new_label and diff_counter < num_diff_images:
-            np.append(x1, anchor_image, axis=1)
-            np.append(x2, new_image, axis=1)
-            np.append(0, labels)
+        elif np.argmax(anchor_label) != np.argmax(new_label) and diff_counter < num_diff_images:
+            x1 = np.concatenate((x1, [anchor_image]), axis=0)
+            x2 = np.concatenate((x2, [new_image]), axis=0)
+            labels = np.append(labels, 0)
             diff_counter += 1 
         else:
             break

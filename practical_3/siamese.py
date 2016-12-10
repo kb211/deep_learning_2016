@@ -41,7 +41,7 @@ class Siamese(object):
 
         https://www.tensorflow.org/versions/r0.11/how_tos/variable_scope/index.html
         """
-        with tf.variable_scope('ConvNet') as conv_scope:
+        with tf.variable_scope('ConvNet', reuse=reuse) as conv_scope:
             ########################
             # PUT YOUR CODE HERE  #
             ########################
@@ -85,8 +85,7 @@ class Siamese(object):
             with tf.name_scope('l2_norm') as scope:
                 l2_out = tf.nn.l2_normalize(h, dim=0, name='l2_norm')
             
-            if reuse:
-                conv_scope.reuse_variables()
+            
             ########################
             # END OF YOUR CODE    #
             ########################
