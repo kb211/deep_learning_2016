@@ -229,14 +229,45 @@ class DataSet(object):
 
     Returns:
       x1: 4D numpy array of shape [batch_size, 32, 32, 3]
-      x1: 4D numpy array of shape [batch_size, 32, 32, 3]
+      x2: 4D numpy array of shape [batch_size, 32, 32, 3]
       labels: numpy array of shape [batch_size]
     """
 
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-    raise NotImplementedError
+    same_counter = 0
+    diff_counter = 0
+    
+    x1 = np.empty([batch_size, 32, 32, 3])
+    x2 = np.empty([batch_size, 32, 32, 3])
+    labels = np.empty([batch_size])
+    
+    rand = random.randrange(0, self.images.size())
+    anchor_image = self.images[rand]
+    anchor_label = self.labels[rand]
+    num_same_images = np.ceil(fraction_same*batch_size)
+    num_diff_images = batch_size-num_same_images
+    
+    for i in range(batch_size):
+        rand2 = random.randrange(0, self.images.size())
+        new_image = self.images[rand2]
+        new_label = self.labels[rand2]
+        if anchor_label == new_label and same_counter < num_same_images:
+            np.append(x1, anchor_image, axis=1)
+            np.append(x2, new_image, axis=1)
+            np.append(1, labels)
+            same_counter += 1
+        elif anchor_label != new_label and diff_counter < num_diff_images:
+            np.append(x1, anchor_image, axis=1)
+            np.append(x2, new_image, axis=1)
+            np.append(0, labels)
+            diff_counter += 1 
+        else:
+            break
+        
+        
+        return x1, x2, labels
     ########################
     # END OF YOUR CODE    #
     ########################

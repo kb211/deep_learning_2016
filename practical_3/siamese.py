@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 import numpy as np
-
+from tensorflow.contrib.layers import initializers
 
 
 class Siamese(object):
@@ -45,7 +45,48 @@ class Siamese(object):
             ########################
             # PUT YOUR CODE HERE  #
             ########################
-            raise NotImplementedError
+            with tf.name_scope('conv1') as scope:
+                W_conv = tf.get_variable("w_conv1", [5, 5, 3, 64], initializer= initializers.xavier_initializer())
+                b_conv = tf.get_variable("b_conv1", [64], initializer=tf.constant_initializer(0.0))
+    
+                conv = tf.nn.conv2d(x, W_conv, strides=[1, 1, 1, 1], padding='SAME')
+                relu = tf.nn.relu(tf.nn.bias_add(conv, b_conv))
+                max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
+            
+            with tf.name_scope('conv2') as scope:
+                W_conv = tf.get_variable("w_conv2", [5, 5, 64, 64], initializer= initializers.xavier_initializer())
+                b_conv = tf.get_variable("b_conv2", [64], initializer=tf.constant_initializer(0.0))
+    
+                conv = tf.nn.conv2d(max_pool, W_conv, strides=[1, 1, 1, 1], padding='SAME')
+                relu = tf.nn.relu(tf.nn.bias_add(conv, b_conv))
+                max_pool = tf.nn.max_pool(relu , ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
+                
+            with tf.name_scope('flatten') as scope:
+                flat = tf.reshape(max_pool, [-1, 64*8*8], name='flatten')
+     
+            with tf.name_scope('fc1') as scope:
+                W = tf.get_variable('w1',
+                                    initializer=initializers.xavier_initializer(),
+                                    shape=[flat.get_shape()[1].value, 384])
+                tf.histogram_summary('weights1', W)
+                b = tf.Variable(tf.zeros([384]))
+                tf.histogram_summary('biasses1',  b)
+                h = tf.nn.relu(tf.matmul(flat, W) + b, name='h1')
+    
+            with tf.name_scope('fc2') as scope:
+                W = tf.get_variable('w2',
+                                    initializer=initializers.xavier_initializer(),
+                                    shape=[384, 192])
+                tf.histogram_summary('weights2', W)
+                b = tf.Variable(tf.zeros([192]))
+                tf.histogram_summary('biasses2',  b)
+                h = tf.nn.relu(tf.matmul(h, W) + b, name='h2')	
+    
+            with tf.name_scope('l2_norm') as scope:
+                l2_out = tf.nn.l2_normalize(h, dim=0, name='l2_norm')
+            
+            if reuse:
+                conv_scope.reuse_variables()
             ########################
             # END OF YOUR CODE    #
             ########################
@@ -82,7 +123,11 @@ class Siamese(object):
         ########################
         # PUT YOUR CODE HERE  #
         ########################
-        raise NotImplementedError
+        d = channel_1-channel_2
+        tmp= label *tf.square(d)
+        
+        tmp2 = (1-label) *tf.maximum((margin - tf.square(d)),0)
+        loss = tf.reduce_sum(tmp +tmp2)
         ########################
         # END OF YOUR CODE    #
         ########################

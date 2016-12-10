@@ -8,10 +8,12 @@ import cifar10_utils
 import tensorflow as tf
 import numpy as np
 import convnet
-from sklearn import manifold
+import siamese
 import matplotlib
 matplotlib.use('Agg')
 import pylab as plt
+import cifar10_siamese_utils
+
 LEARNING_RATE_DEFAULT = 1e-4
 BATCH_SIZE_DEFAULT = 128
 MAX_STEPS_DEFAULT = 15000
@@ -172,7 +174,47 @@ def train_siamese():
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-    raise NotImplementedError
+    num_tuples = 500
+    batch_size = FLAGS.batch_size
+    fraction_same = 0.2
+    dataset = cifar10_siamese_utils.create_dataset(source=cifar10.test, num_tuples, batch_size, fraction_same)
+    
+
+    model = siamese.Siamese(n_classes=10, reuse=True)
+    x1 = tf.placeholder(tf.float32, [None, 32, 32, 3])
+    x2 = tf.placeholder(tf.float32, [None, 32, 32, 3])
+    
+    y = tf.placeholder(tf.float32, [None, 10])
+    
+    channel1_out = model.inference(x1)
+        
+    channel2_out = model.inference(x2)
+    
+    loss = model.loss(channel1_out, channel2_out, y, margin=1)
+  
+    step = train_step(loss)
+    
+    init = tf.initialize_all_variables()
+  
+    #saver = tf.train.Saver()
+    sess = tf.Session()
+    sess.run(init)
+  
+    #merged = tf.merge_all_summaries()
+    
+    for i in range(FLAGS.max_steps):
+      batch_x1, batch_x2, batch_labels = cifar10_siamese_utils.DataSet.next_batch(FLAGS.batch_size)
+      _ = sess.run([step], feed_dict={x1: batch_x1, x2: batch_x2, y:batch_labels})
+      if i % FLAGS.print_freq == 0:
+          print('iteration: ' + str(i)+ 'Loss: ' + str(l))
+      #train_writer.add_summary(summary, i)
+      
+      if i % 100 == 0:          
+          for _tuple in dataset:
+              (x1_test, x2_test, y_test) = _tuple
+              test_loss += sess.run([loss], feed_dict={x1: x1_test, x2: x2_test, y: y_test })
+              test_loss /= num_tuples
+          print('iteration: ' + str(i)+ 'Loss: ' + str(test_loss))
     ########################
     # END OF YOUR CODE    #
     ########################
