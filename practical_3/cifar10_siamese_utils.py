@@ -242,15 +242,14 @@ class DataSet(object):
     x1 = np.empty([0, 32, 32, 3])
     x2 = np.empty([0, 32, 32, 3])
     
-    labels = np.empty([batch_size])
+    labels = np.empty([0])
     
     rand = random.randrange(0, self.images.shape[0])
     anchor_image = self.images[rand]
     anchor_label = self.labels[rand]
     num_same_images = np.ceil(fraction_same*batch_size)
     num_diff_images = batch_size-num_same_images
-    print(x1.shape)
-    print(anchor_image.shape)
+    
     for i in range(batch_size):
         rand2 = random.randrange(0, self.images.shape[0])
         new_image = self.images[rand2]
@@ -268,7 +267,9 @@ class DataSet(object):
             diff_counter += 1 
         else:
             break
-        
+    labels = np.reshape(labels, (labels.shape[0], 1))    
+   
+    
     ########################
     # END OF YOUR CODE    #
     ########################
