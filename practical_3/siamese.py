@@ -122,11 +122,19 @@ class Siamese(object):
         ########################
         # PUT YOUR CODE HERE  #
         ########################
-        d = channel_1-channel_2
-        tmp= label *tf.square(d)
+        d = tf.reduce_sum(tf.square(tf.sub(channel_1, channel_2)), 1)
+        d_square = tf.square(d)
         
-        tmp2 = (1-label) *tf.maximum((margin - tf.square(d)),0)
-        loss = tf.reduce_sum(tmp +tmp2)
+        loss = label*d_square + tf.maximum(0., margin -d_square) * (1-label)
+	
+        loss = tf.reduce_mean(loss)
+	
+	#d = tf.sqrt(tf.reduce_sum(tf.pow(tf.sub(channel_1,channel_2),2),1,keep_dims=True))
+	#tmp= label *tf.square(d)
+    
+    	#tmp2 = (1-label) *tf.square(tf.maximum((1 - d),0))
+	#loss =  tf.reduce_mean(tmp +tmp2)
+        
         ########################
         # END OF YOUR CODE    #
         ########################

@@ -110,22 +110,22 @@ def train():
   
     merged = tf.merge_all_summaries()
   
-    #train_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/train',
-    #                                  sess.graph)
-    #test_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/test')
+    train_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/train',
+                                      sess.graph)
+    test_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/test')
     
     for i in range(FLAGS.max_steps):
       batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
       summary, _ = sess.run([merged, step], feed_dict={x: batch_xs, y: batch_ys})
-      #train_writer.add_summary(summary, i)
+      train_writer.add_summary(summary, i)
       
       if i % 100 == 0:
           summary, acc, l = sess.run([merged, accuracy, loss], feed_dict={x: x_test, y: y_test})
           print('iteration: ' + str(i) + 'Accuracy: ' + str(acc) + 'Loss: ' + str(l))
-          #test_writer.add_summary(summary, i)
+          test_writer.add_summary(summary, i)
 
-    #test_writer.close()
-    #train_writer.close()
+    test_writer.close()
+    train_writer.close()
     
     save_path = saver.save(sess, "checkpoints/convnet")
     ########################
@@ -187,11 +187,11 @@ def train_siamese():
     x1 = tf.placeholder(tf.float32, [None, 32, 32, 3])
     x2 = tf.placeholder(tf.float32, [None, 32, 32, 3])
     
-    y = tf.placeholder(tf.float32, [None, 10])
+    y = tf.placeholder(tf.float32, [None, 1])
     
-    channel1_out = model.inference(x1, reuse=True)
+    channel1_out = model.inference(x1, reuse=False)
         
-    channel2_out = model.inference(x2)
+    channel2_out = model.inference(x2, reuse=True)
     
     loss = model.loss(channel1_out, channel2_out, y, margin=1)
   
@@ -199,25 +199,29 @@ def train_siamese():
     
     init = tf.initialize_all_variables()
   
-    #saver = tf.train.Saver()
+    saver = tf.train.Saver()
     sess = tf.Session()
     sess.run(init)
   
     #merged = tf.merge_all_summaries()
-    
+    test_loss = 0. 
     for i in range(FLAGS.max_steps):
-      batch_x1, batch_x2, batch_labels = cifar10_siamese_utils.DataSet.next_batch(FLAGS.batch_size)
-      _ = sess.run([step], feed_dict={x1: batch_x1, x2: batch_x2, y:batch_labels})
+      batch_x1, batch_x2, batch_labels = cifar10_siamese_utils.DataSet.next_batch(cifar10.train, FLAGS.batch_size)
+      _, l = sess.run([step, loss], feed_dict={x1: batch_x1, x2: batch_x2, y:batch_labels})
       if i % FLAGS.print_freq == 0:
-          print('iteration: ' + str(i)+ 'Loss: ' + str(l))
+          print('iteration: ' + str(i)+ 'Train Loss: ' + str(l))
       #train_writer.add_summary(summary, i)
       
-      if i % 100 == 0:          
+      if i % FLAGS.eval_freq == 0:          
           for _tuple in dataset:
               (x1_test, x2_test, y_test) = _tuple
-              test_loss += sess.run([loss], feed_dict={x1: x1_test, x2: x2_test, y: y_test })
-              test_loss /= num_tuples
-          print('iteration: ' + str(i)+ 'Loss: ' + str(test_loss))
+              test_loss += sess.run(loss, feed_dict={x1: x1_test, x2: x2_test, y: y_test })
+              
+              test_loss /= n_tuples
+          print('iteration: ' + str(i)+ 'Test Loss: ' + str(test_loss))
+      if i % FLAGS.checkpoint_freq:
+          save_path = saver.save(sess, "checkpoints/siamese{:d}".format(i))
+
     ########################
     # END OF YOUR CODE    #
     ########################
