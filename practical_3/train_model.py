@@ -13,6 +13,7 @@ import matplotlib
 matplotlib.use('Agg')
 import pylab as plt
 import cifar10_siamese_utils
+from sklearn import manifold
 
 LEARNING_RATE_DEFAULT = 1e-4
 BATCH_SIZE_DEFAULT = 128
@@ -180,7 +181,7 @@ def train_siamese():
     
     cifar10 = cifar10_siamese_utils.get_cifar10('cifar10/cifar-10-batches-py')
     
-    dataset = cifar10_siamese_utils.create_dataset(source=cifar10.test, num_tuples=n_tuples, batch_size=_size, fraction_same=f_same)
+    dataset = cifar10_siamese_utils.create_dataset(source="Test", num_tuples=n_tuples, batch_size=_size, fraction_same=f_same)
     
 
     model = siamese.Siamese()
@@ -204,24 +205,35 @@ def train_siamese():
     sess.run(init)
   
     #merged = tf.merge_all_summaries()
+
+    #train_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/train',
+    #                                  sess.graph)
+    #test_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/test')
+
     test_loss = 0. 
     for i in range(FLAGS.max_steps):
-      batch_x1, batch_x2, batch_labels = cifar10_siamese_utils.DataSet.next_batch(cifar10.train, FLAGS.batch_size)
+      batch_x1, batch_x2, batch_labels = cifar10.train.next_batch(FLAGS.batch_size)
       _, l = sess.run([step, loss], feed_dict={x1: batch_x1, x2: batch_x2, y:batch_labels})
       if i % FLAGS.print_freq == 0:
-          print('iteration: ' + str(i)+ 'Train Loss: ' + str(l))
-      #train_writer.add_summary(summary, i)
+          print('iteration: ' + str(i)+ ' Train Loss: ' + str(l))
+          #train_writer.add_summary(summary, i)
       
-      if i % FLAGS.eval_freq == 0:          
+      if i % FLAGS.eval_freq == 0:
+          test_loss = 0.          
           for _tuple in dataset:
               (x1_test, x2_test, y_test) = _tuple
               test_loss += sess.run(loss, feed_dict={x1: x1_test, x2: x2_test, y: y_test })
               
-              test_loss /= n_tuples
-          print('iteration: ' + str(i)+ 'Test Loss: ' + str(test_loss))
-      if i % FLAGS.checkpoint_freq:
-          save_path = saver.save(sess, "checkpoints/siamese{:d}".format(i))
+          test_loss /= n_tuples
+          print('iteration: ' + str(i)+ ' Test Loss: ' + str(test_loss))
+          #test_writer.add_summary(summary, i)
 
+#      if i % FLAGS.checkpoint_freq == 0:
+#          save_path = saver.save(sess, "checkpoints/siamese{:d}".format(i))
+
+    save_path = saver.save(sess, "checkpoints/siamese")
+    #test_writer.close()
+    #train_writer.close()
     ########################
     # END OF YOUR CODE    #
     ########################
@@ -268,49 +280,71 @@ def feature_extraction():
     	#print('Accuracy: ' + str(acc))
     
     
-    	#tsne = manifold.TSNE(n_components=2 , init='pca', random_state=0)
+    	tsne = manifold.TSNE(n_components=2, random_state=0)
     	#fc2_tsne = tsne.fit_transform(np.squeeze(fc2_out))
 	#fc1_tsne = tsne.fit_transform(np.squeeze(fc1_out))
 	#flatten_tsne = tsne.fit_transform(np.squeeze(flatten))
     	
-	fc2_tsne = np.load('fc2_tsne')
-	fc1_tsne = np.load('fc1_tsne')
-	flatten_tsne = np.load('flatten_tsne')
-	labels = np.argmax(y_test, axis=1)
+	#fc2_tsne = np.load('fc2_tsne')
+	#fc1_tsne = np.load('fc1_tsne')
+	#flatten_tsne = np.load('flatten_tsne')
+	#labels = np.argmax(y_test, axis=1)
 	
-    	plt.figure(figsize=(25, 20))  #in inches
+    	#plt.figure(figsize=(25, 20))  #in inches
 
-        x = fc2_tsne[:,0]/np.linalg.norm(fc2_tsne[:,0])
-	y = fc2_tsne[:,1]/np.linalg.norm(fc2_tsne[:,1])
-        plt.scatter(x, y, c=labels)
-	plt.colorbar()
-    	plt.savefig('fc2_tsne_norm.png')
+        #x = fc2_tsne[:,0]/np.linalg.norm(fc2_tsne[:,0])
+	#y = fc2_tsne[:,1]/np.linalg.norm(fc2_tsne[:,1])
+        #plt.scatter(x, y, c=labels)
+	#plt.colorbar()
+    	#plt.savefig('fc2_tsne_norm.png')
 
-	plt.figure(figsize=(25, 20))
+	#plt.figure(figsize=(25, 20))
 
-        x = fc1_tsne[:,0]/np.linalg.norm(fc1_tsne[:,0])
-        y = fc1_tsne[:,1]/np.linalg.norm(fc1_tsne[:,1])
-        plt.scatter(x, y, c=labels)
-	plt.colorbar()
-        plt.savefig('fc1_tsne_norm.png')
+        #x = fc1_tsne[:,0]/np.linalg.norm(fc1_tsne[:,0])
+        #y = fc1_tsne[:,1]/np.linalg.norm(fc1_tsne[:,1])
+        #plt.scatter(x, y, c=labels)
+	#plt.colorbar()
+        #plt.savefig('fc1_tsne_norm.png')
 	
-	plt.figure(figsize=(25, 20))  #in inches
+	#plt.figure(figsize=(25, 20))  #in inches
 
-        x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
-        y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
-        plt.scatter(x, y, c=labels)
-	plt.colorbar()
-        plt.savefig('flatten_tsne_norm.png')
+        #x = flatten_tsne[:,0]/np.linalg.norm(flatten_tsne[:,0])
+        #y = flatten_tsne[:,1]/np.linalg.norm(flatten_tsne[:,1])
+        #plt.scatter(x, y, c=labels)
+	#plt.colorbar()
+        #plt.savefig('flatten_tsne_norm.png')
 
 	#fc2_tsne.dump('fc2_tsne')
 	#fc1_tsne.dump('fc1_tsne')
 	#flatten_tsne.dump('flatten_tsne')
-	print('fc1 scores: ')
-	_classify(fc1_tsne, labels)
-	print('fc2 scores: ')
-	_classify(fc2_tsne, labels)
-	print('flatten layer scores: ')
-	_classify(flatten_tsne, labels)
+        #print('fc1 scores: ')
+	#_classify(fc1_tsne, labels)
+	#print('fc2 scores: ')
+	#_classify(fc2_tsne, labels)
+	#print('flatten layer scores: ')
+	#_classify(flatten_tsne, labels)
+
+        saver.restore(sess, "checkpoints/siamese4999")
+        cifar10 = cifar10_siamese_utils.get_cifar10('cifar10/cifar-10-batches-py')
+        dataset = cifar10_siamese_utils.create_dataset(source=cifar10.test, num_tuples=n_tuples, batch_size=_size, fraction_same=f_same)
+        test_loss = 0.
+        for _tuple in dataset:
+            (x1_test, x2_test, y_test) = _tuple
+            l2_out = sess.run(siamese.l2_out, feed_dict={x1: x1_test, x2: x2_test, y: y_test })
+
+        test_loss /= n_tuples
+        print('Accuracy: ' + str(acc))
+
+        siamese_tsne = tsne.fit_transform(np.squeeze(l2_out))
+        plt.figure(figsize=(25, 20))  #in inches
+
+        x = siamese_tsne[:,0]/np.linalg.norm(siamese_tsne[:,0])
+        y = siamese_tsne[:,1]/np.linalg.norm(siamese_tsne[:,1])
+        plt.scatter(x, y, c=labels)
+        plt.colorbar()
+        plt.savefig('siamese_l2out.png')
+
+        siamese_tsne.dump('siamese_tsne')
     ########################
     # END OF YOUR CODE    #
     ########################

@@ -68,23 +68,23 @@ class Siamese(object):
                 W = tf.get_variable('w1',
                                     initializer=initializers.xavier_initializer(),
                                     shape=[flat.get_shape()[1].value, 384])
-                tf.histogram_summary('weights1', W)
+                #tf.histogram_summary('weights1', W)
                 b = tf.Variable(tf.zeros([384]))
-                tf.histogram_summary('biasses1',  b)
+                #tf.histogram_summary('biasses1',  b)
                 h = tf.nn.relu(tf.matmul(flat, W) + b, name='h1')
     
             with tf.name_scope('fc2') as scope:
                 W = tf.get_variable('w2',
                                     initializer=initializers.xavier_initializer(),
                                     shape=[384, 192])
-                tf.histogram_summary('weights2', W)
+                #tf.histogram_summary('weights2', W)
                 b = tf.Variable(tf.zeros([192]))
-                tf.histogram_summary('biasses2',  b)
+                #tf.histogram_summary('biasses2',  b)
                 h = tf.nn.relu(tf.matmul(h, W) + b, name='h2')	
     
             with tf.name_scope('l2_norm') as scope:
                 l2_out = tf.nn.l2_normalize(h, dim=0, name='l2_norm')
-            
+                self.l2_out = l2_out
             
             ########################
             # END OF YOUR CODE    #
@@ -122,19 +122,13 @@ class Siamese(object):
         ########################
         # PUT YOUR CODE HERE  #
         ########################
-        d = tf.reduce_sum(tf.square(tf.sub(channel_1, channel_2)), 1)
-        d_square = tf.square(d)
+        d = tf.reduce_sum(tf.square((channel_1 - channel_2)), 1)
+        #d = tf.sqrt(d)        
         
-        loss = label*d_square + tf.maximum(0., margin -d_square) * (1-label)
-	
+        loss = tf.mul(label, d) + tf.mul(tf.maximum(0., (margin -  d)), (1 - label))
+        
         loss = tf.reduce_mean(loss)
-	
-	#d = tf.sqrt(tf.reduce_sum(tf.pow(tf.sub(channel_1,channel_2),2),1,keep_dims=True))
-	#tmp= label *tf.square(d)
-    
-    	#tmp2 = (1-label) *tf.square(tf.maximum((1 - d),0))
-	#loss =  tf.reduce_mean(tmp +tmp2)
-        
+	 
         ########################
         # END OF YOUR CODE    #
         ########################

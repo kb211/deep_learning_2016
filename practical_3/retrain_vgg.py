@@ -4,9 +4,11 @@ from __future__ import print_function
 
 import argparse
 import os
-
+import vgg
 import tensorflow as tf
 import numpy as np
+import convnet
+import cifar10_utils
 
 LEARNING_RATE_DEFAULT = 1e-4
 BATCH_SIZE_DEFAULT = 128
@@ -36,7 +38,9 @@ def train_step(loss):
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-    raise NotImplementedError
+    trainable = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "fc")
+    train_op = tf.train.AdamOptimizer(FLAGS.learning_rate, name="optimizer").minimize(loss, trainable)    
+    
     ########################
     # END OF YOUR CODE    #
     ########################
@@ -72,7 +76,70 @@ def train():
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-    raise NotImplementedError
+    std = 0.001
+    reg_strength = 0.0001
+    x = tf.placeholder("float", [None, None, None, 3])
+    y = tf.placeholder("float", [None, 10])
+    
+    model = convnet.ConvNet()
+    pool5, assign_ops = vgg.load_pretrained_VGG16_pool5(x)
+
+    with tf.variable_scope('fc') as var_scope:
+        with tf.name_scope('flatten') as scope:
+            flat = tf.reshape(pool5, [-1, pool5.get_shape()[3].value], name='flatten')
+
+	with tf.name_scope('fc1') as scope:
+	    W = tf.get_variable('w1',
+            initializer=tf.random_normal_initializer(stddev=std),
+            shape=[flat.get_shape()[1].value, 384],
+            regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
+
+	    b = tf.Variable(tf.zeros([384]))
+
+	    h = tf.nn.relu(tf.matmul(flat, W) + b, name='h1')
+
+        with tf.name_scope('fc2') as scope:
+	    W = tf.get_variable('w2',
+	    initializer=tf.random_normal_initializer(stddev=std),
+	    shape=[384, 192],
+	    regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
+
+	    b = tf.Variable(tf.zeros([192]))
+
+	    h2 = tf.nn.relu(tf.matmul(h, W) + b, name='h2')
+
+        with tf.name_scope('fc3') as scope:
+	    W = tf.get_variable('final_w',
+	    initializer=tf.random_normal_initializer(stddev=std),
+	    shape=[192, 10],
+	    regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
+
+            b = tf.Variable(tf.zeros([10]))
+
+            logits = tf.matmul(h2, W) + b
+
+    loss = model.loss(logits, y)
+    accuracy = model.accuracy(logits, y)
+    step = train_step(loss)
+
+    init = tf.initialize_all_variables()
+    saver = tf.train.Saver()
+    sess = tf.Session()
+    sess.run(init)
+    sess.run(assign_ops)
+
+    cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
+    x_test, y_test = cifar10.test.images, cifar10.test.labels
+
+    for i in range(FLAGS.max_steps):
+        batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
+        _ = sess.run([step], feed_dict={x: batch_xs, y: batch_ys})
+      
+
+        if i % 100 == 0:
+            acc, l = sess.run([accuracy, loss], feed_dict={x: x_test, y: y_test})
+            print('iteration: ' + str(i) + 'Accuracy: ' + str(acc) + 'Loss: ' + str(l))
+          
     ########################
     # END OF YOUR CODE    #
     ########################
