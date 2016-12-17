@@ -38,20 +38,7 @@ def train_step(loss):
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-<<<<<<< HEAD
-
-    # trainable = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "fc")
-    #train_op = tf.train.AdamOptimizer(FLAGS.learning_rate, name="optimizer").minimize(loss)    
-       
     train_op = tf.train.AdamOptimizer(FLAGS.learning_rate, name="optimizer").minimize(loss)
-        
-=======
-    # trainable = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, "fc")
-    train_op = tf.train.AdamOptimizer(FLAGS.learning_rate, name="optimizer").minimize(loss)    
-
-    
-
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
     ########################
     # END OF YOUR CODE    #
     ########################
@@ -89,32 +76,20 @@ def train():
     ########################
     std = 0.001
     reg_strength = 0.0001
-<<<<<<< HEAD
 
     x = tf.placeholder(tf.float32, [None, None, None, 3])
-=======
-    x = tf.placeholder(tf.float32, [None, 32, 32, 3])
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
+
     y = tf.placeholder(tf.float32, [None, 10])
     
     model = convnet.ConvNet()
     pool5, assign_ops = vgg.load_pretrained_VGG16_pool5(x)
-    
-<<<<<<< HEAD
-    #pool5 = tf.stop_gradient(pool5)
-=======
-    pool5 = tf.stop_gradient(pool5)
 
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
+    #pool5 = tf.stop_gradient(pool5)
 
     with tf.variable_scope('fc') as var_scope:
         with tf.name_scope('flatten') as scope:
             flat = tf.reshape(pool5, [-1, pool5.get_shape()[3].value], name='flatten')
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
         with tf.name_scope('fc1') as scope:
             W = tf.get_variable('w1',
                 initializer=tf.random_normal_initializer(stddev=std),
@@ -126,28 +101,17 @@ def train():
 
         with tf.name_scope('fc2') as scope:
             W = tf.get_variable('w2',
-<<<<<<< HEAD
-=======
 
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
 	    initializer=tf.random_normal_initializer(stddev=std),
 	    shape=[384, 192],
 	    regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
             b = tf.Variable(tf.zeros([192]))
 
             h2 = tf.nn.relu(tf.matmul(h, W) + b, name='h2')
 
         with tf.name_scope('fc3') as scope:
             W = tf.get_variable('final_w',
-<<<<<<< HEAD
-=======
 
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
 	    initializer=tf.random_normal_initializer(stddev=std),
 	    shape=[192, 10],
 	    regularizer=tf.contrib.layers.l2_regularizer(reg_strength))
@@ -164,15 +128,9 @@ def train():
     saver = tf.train.Saver()
     sess = tf.Session()
     sess.run(init)
-<<<<<<< HEAD
 
     #for op in assign_ops:
     sess.run(assign_ops)
-=======
-    
-    for op in assign_ops:
-        sess.run(op)
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
 
     merged = tf.merge_all_summaries()
 
@@ -180,40 +138,22 @@ def train():
                                       sess.graph)
     test_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/VGGtest')
 
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
     cifar10 = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
     x_test, y_test = cifar10.test.images, cifar10.test.labels
 
     for i in range(FLAGS.max_steps):
         batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
-<<<<<<< HEAD
         summary, _ = sess.run([merged, step], feed_dict={x: batch_xs, y: batch_ys})
-=======
-        _ = sess.run([ step], feed_dict={x: batch_xs, y: batch_ys})
-         
-        if i% PRINT_FREQ_DEFAULT == 0:
-            summary_tr, _, acc_tr, loss_tr = sess.run([merged, step, accuracy, loss], feed_dict={x: batch_xs, y: batch_ys})
-            print('TRAINING iteration: ' + str(i) + ' Accuracy: ' + str(acc_tr) + ' Loss: ' + str(loss_tr))
-            train_writer.add_summary(summary_tr, i)
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
-      
+
+        _ = sess.run([ step], feed_dict={x: batch_xs, y: batch_ys}
 
         if i % EVAL_FREQ_DEFAULT == 0:
             summary, acc, l = sess.run([merged, accuracy, loss], feed_dict={x: x_test[0:1000], y: y_test[0:1000]})
-<<<<<<< HEAD
+
             print('iteration: ' + str(i) + 'Accuracy: ' + str(acc) + 'Loss: ' + str(l))
             train_writer.add_summary(summary, i)
             test_writer.add_summary(summary, i)
 
-=======
-            print('\tVAL iteration: ' + str(i) + ' Accuracy: ' + str(acc) + ' Loss: ' + str(l))
-            
-            test_writer.add_summary(summary, i)
->>>>>>> 7a47fe3062f9fb0890be95a0f623838a046fa12b
     test_writer.close()
     train_writer.close()
 
