@@ -145,13 +145,14 @@ def train():
         batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
         summary, _ = sess.run([merged, step], feed_dict={x: batch_xs, y: batch_ys})
 
-        _ = sess.run([ step], feed_dict={x: batch_xs, y: batch_ys}
+        if i % FLAGS.print_freq == 0 :
+            train_writer.add_summary(summary, i)
 
-        if i % EVAL_FREQ_DEFAULT == 0:
+        if i % FLAGS.eval_freq == 0:
             summary, acc, l = sess.run([merged, accuracy, loss], feed_dict={x: x_test[0:1000], y: y_test[0:1000]})
 
             print('iteration: ' + str(i) + 'Accuracy: ' + str(acc) + 'Loss: ' + str(l))
-            train_writer.add_summary(summary, i)
+            
             test_writer.add_summary(summary, i)
 
     test_writer.close()

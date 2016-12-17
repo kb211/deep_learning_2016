@@ -204,29 +204,30 @@ def train_siamese():
     sess = tf.Session()
     sess.run(init)
   
-    #merged = tf.merge_all_summaries()
+    merged = tf.merge_all_summaries()
 
-    #train_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/train',
-    #                                  sess.graph)
-    #test_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/test')
+    train_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/train',
+                                      sess.graph)
+    test_writer = tf.train.SummaryWriter(FLAGS.log_dir + '/test')
 
     test_loss = 0. 
     for i in range(FLAGS.max_steps):
       batch_x1, batch_x2, batch_labels = cifar10.train.next_batch(FLAGS.batch_size)
-      _, l = sess.run([step, loss], feed_dict={x1: batch_x1, x2: batch_x2, y:batch_labels})
+      summary, _, l = sess.run([merged, step, loss], feed_dict={x1: batch_x1, x2: batch_x2, y:batch_labels})
       if i % FLAGS.print_freq == 0:
           print('iteration: ' + str(i)+ ' Train Loss: ' + str(l))
-          #train_writer.add_summary(summary, i)
+          train_writer.add_summary(summary, i)
       
+
       if i % FLAGS.eval_freq == 0:
           test_loss = 0.          
           for _tuple in dataset:
               (x1_test, x2_test, y_test) = _tuple
-              test_loss += sess.run(loss, feed_dict={x1: x1_test, x2: x2_test, y: y_test })
-              
+              summary, l = sess.run([merged, loss], feed_dict={x1: x1_test, x2: x2_test, y: y_test })
+              test_loss += l
           test_loss /= n_tuples
           print('iteration: ' + str(i)+ ' Test Loss: ' + str(test_loss))
-          #test_writer.add_summary(summary, i)
+          test_writer.add_summary(summary, i)
 
 #      if i % FLAGS.checkpoint_freq == 0:
 #          save_path = saver.save(sess, "checkpoints/siamese{:d}".format(i))

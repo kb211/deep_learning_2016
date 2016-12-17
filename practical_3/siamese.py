@@ -123,13 +123,14 @@ class Siamese(object):
         ########################
         # PUT YOUR CODE HERE  #
         ########################
-        d = tf.reduce_sum(tf.square((channel_1 - channel_2)), 1)
+        with tf.name_scope('contrastive_loss') as scope:
+            d = tf.reduce_sum(tf.square((channel_1 - channel_2)), 1)
         #d = tf.sqrt(d)        
         
-        loss = tf.mul(label, d) + tf.mul(tf.maximum(0., (margin -  d)), (1 - label))
+            loss = tf.mul(label, d) + tf.mul(tf.maximum(0., (margin -  d)), (1 - label))
         
-        loss = tf.reduce_mean(loss)
-	 
+            loss = tf.reduce_mean(loss)
+	    tf.scalar_summary('contrastive_loss', loss) 
         ########################
         # END OF YOUR CODE    #
         ########################
