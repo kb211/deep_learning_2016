@@ -118,9 +118,10 @@ def train():
     for i in range(FLAGS.max_steps):
       batch_xs, batch_ys = cifar10.train.next_batch(FLAGS.batch_size)
       summary, _ = sess.run([merged, step], feed_dict={x: batch_xs, y: batch_ys})
-      train_writer.add_summary(summary, i)
+      if i % FLAGS.print_freq == 0:
+          train_writer.add_summary(summary, i)
       
-      if i % 100 == 0:
+      if i % FLAGS.eval_freq == 0:
           summary, acc, l = sess.run([merged, accuracy, loss], feed_dict={x: x_test, y: y_test})
           print('iteration: ' + str(i) + 'Accuracy: ' + str(acc) + 'Loss: ' + str(l))
           test_writer.add_summary(summary, i)
@@ -258,18 +259,18 @@ def feature_extraction():
     ########################
     # PUT YOUR CODE HERE  #
     ########################
-    model = convnet.ConvNet(n_classes=10)
+    #model = convnet.ConvNet(n_classes=10)
 
-    x = tf.placeholder(tf.float32, [None, 32, 32, 3])
-    y = tf.placeholder(tf.float32, [None, 10])
+    #x = tf.placeholder(tf.float32, [None, 32, 32, 3])
+    #y = tf.placeholder(tf.float32, [None, 10])
 
-    logits = model.inference(x)
+    #logits = model.inference(x)
 
-    accuracy = model.accuracy(logits, y)
+    #accuracy = model.accuracy(logits, y)
 
-    init = tf.initialize_all_variables()
+    #init = tf.initialize_all_variables()
 
-    saver = tf.train.Saver()
+    #saver = tf.train.Saver()
 
     with tf.Session() as sess:
   	#saver.restore(sess, "checkpoints/convnet")
@@ -325,19 +326,28 @@ def feature_extraction():
 	#print('flatten layer scores: ')
 	#_classify(flatten_tsne, labels)
 
-        saver.restore(sess, "checkpoints/siamese4999")
-        cifar10 = cifar10_siamese_utils.get_cifar10('cifar10/cifar-10-batches-py')
-        dataset = cifar10_siamese_utils.create_dataset(source=cifar10.test, num_tuples=n_tuples, batch_size=_size, fraction_same=f_same)
-        test_loss = 0.
-        for _tuple in dataset:
-            (x1_test, x2_test, y_test) = _tuple
-            l2_out = sess.run(siamese.l2_out, feed_dict={x1: x1_test, x2: x2_test, y: y_test })
 
-        test_loss /= n_tuples
-        print('Accuracy: ' + str(acc))
+    model = siamese.Siamese()
+    x1 = tf.placeholder(tf.float32, [None, 32, 32, 3])
+
+    model.inference(x1, reuse=False)
+
+    with tf.Session() as siamese_sess:
+        init = tf.initialize_all_variables()
+
+        saver = tf.train.Saver()
+        saver.restore(siamese_sess, "checkpoints/siamese")
+
+
+        dataset = cifar10_utils.get_cifar10('cifar10/cifar-10-batches-py')
+        x_test, y_test = cifar10.test.images, cifar10.test.labels
+
+        
+        l2_out = siamese_sess.run(model.l2_out, feed_dict={x1: x_test})
 
         siamese_tsne = tsne.fit_transform(np.squeeze(l2_out))
         plt.figure(figsize=(25, 20))  #in inches
+        labels = np.argmax(y_test, axis=1)
 
         x = siamese_tsne[:,0]/np.linalg.norm(siamese_tsne[:,0])
         y = siamese_tsne[:,1]/np.linalg.norm(siamese_tsne[:,1])
@@ -346,6 +356,9 @@ def feature_extraction():
         plt.savefig('siamese_l2out.png')
 
         siamese_tsne.dump('siamese_tsne')
+        print('siamese L2 scores: ')
+        _classify(siamese_tsne, labels)
+    
     ########################
     # END OF YOUR CODE    #
     ########################

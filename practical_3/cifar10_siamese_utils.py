@@ -14,6 +14,7 @@ from six.moves import xrange
 
 import random
 from tensorflow.contrib.learn.python.learn.datasets import base
+from sklearn.utils import shuffle
 
 # Default paths for downloading CIFAR10 data
 CIFAR10_FOLDER = 'cifar10/cifar-10-batches-py'
@@ -256,7 +257,7 @@ class DataSet(object):
     num_same_images = np.ceil(fraction_same*batch_size)
     num_diff_images = batch_size-num_same_images
     
-    for i in range(batch_size):
+    while same_counter + diff_counter != batch_size:
         rand2 = random.randrange(0, self.images.shape[0])
         new_image = self.images[rand2]
         new_label = self.labels[rand2]
@@ -271,10 +272,10 @@ class DataSet(object):
             x2 = np.concatenate((x2, [new_image]), axis=0)
             labels = np.append(labels, 0)
             diff_counter += 1 
-        else:
-            break
+    
     labels = np.reshape(labels, (labels.shape[0], 1))    
    
+    x2, labels = shuffle(x2, labels, random_state=0)
     
     ########################
     # END OF YOUR CODE    #

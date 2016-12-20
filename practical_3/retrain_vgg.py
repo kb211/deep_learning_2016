@@ -158,7 +158,7 @@ def train():
     test_writer.close()
     train_writer.close()
 
-          
+    save_path = saver.save(sess, "checkpoints/vgg")          
     ########################
     # END OF YOUR CODE    #
     ########################

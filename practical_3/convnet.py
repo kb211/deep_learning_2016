@@ -56,8 +56,9 @@ class ConvNet(object):
             # PUT YOUR CODE HERE  #
             ########################
         
-            #reg_strength = 0.0001
-            reg_strength = 0.0
+            reg_strength = 0.0001
+            #reg_strength = 0.0
+            dropout = 0.5
             std = 0.001
             with tf.name_scope('conv1') as scope:
                 W_conv = tf.get_variable("w_conv1", [5, 5, 3, 64], initializer=tf.random_normal_initializer(stddev=std))
@@ -88,6 +89,7 @@ class ConvNet(object):
                 b = tf.Variable(tf.zeros([384]))
                 #tf.histogram_summary('biasses1',  b)
                 h = tf.nn.relu(tf.matmul(flat, W) + b, name='h1')
+                h = tf.nn.dropout(h, dropout)
    		self.fc1_out = h 
             with tf.name_scope('fc2') as scope:
                 W = tf.get_variable('w2',
@@ -98,6 +100,7 @@ class ConvNet(object):
                 b = tf.Variable(tf.zeros([192]))
                 #tf.histogram_summary('biasses2',  b)
                 h2 = tf.nn.relu(tf.matmul(h, W) + b, name='h2')	
+                h2 = tf.nn.dropout(h2, dropout)
                 self.fc2_out = h2
                 
             with tf.name_scope('fc3') as scope:
